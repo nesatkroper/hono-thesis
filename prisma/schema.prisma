@@ -1,0 +1,141 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+enum ExamType {
+  MIDTERM
+  FINAL
+  QUIZ
+  ASSIGNMENT
+}
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+model User {
+  userId           String   @id @default(uuid())
+  email        String   @unique
+  password     String
+  fullName     String
+  role         Role     @default(STUDENT)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  student      Student?
+  teacher      Teacher?
+}
+model Student {
+  studentId        String   @id @default(uuid())
+  userId    String   @unique
+  grade     String
+  section   String
+  dob       DateTime
+  user      User     @relation(fields: [userId], references: [userId])
+  guardians Guardian[]
+  attendance Attendance[]
+  enrollments Enrollment[]
+  grades     Grade[]
+  payment Payment[]
+}
+model Teacher {
+  teacherId        String   @id @default(uuid())
+  userId    String   @unique
+  subject   String
+  bio       String?
+  user      User     @relation(fields: [userId], references: [userId])
+  classes   Class[]
+}
+model Class {
+  classId         String    @id @default(uuid())
+  name       String
+  subjectId  String
+  teacherId  String
+  scheduleId String?
+
+  subject    Subject   @relation(fields: [subjectId], references: [subjectId])
+  teacher    Teacher   @relation(fields: [teacherId], references: [teacherId])
+  schedule   Schedule? @relation(fields: [scheduleId], references: [scheduleId])
+  enrollments Enrollment[]
+  attendance Attendance[]
+  grade Grade[]
+}
+model Subject {
+  subjectId     String  @id @default(uuid())
+  name   String
+  code   String  @unique
+  classes Class[]
+}
+model Schedule {
+  scheduleId        String   @id @default(uuid())
+  classId   String
+  day       String
+  startTime DateTime
+  endTime   DateTime
+
+  class     Class[]
+}
+model Enrollment {
+  enrollmentId        String   @id @default(uuid())
+  studentId String
+  classId   String
+
+  student   Student  @relation(fields: [studentId], references: [studentId])
+  class     Class    @relation(fields: [classId], references: [classId])
+}
+model Attendance {
+  attendanceId        String   @id @default(uuid())
+  date      DateTime
+  status    AttendanceStatus
+  studentId String
+  classId   String
+
+  student   Student  @relation(fields: [studentId], references: [studentId])
+  class     Class    @relation(fields: [classId], references: [classId])
+}
+model Grade {
+  gradeId        String   @id @default(uuid())
+  studentId String
+  classId   String
+  score     Float
+  examType  ExamType
+
+  student   Student  @relation(fields: [studentId], references: [studentId])
+  class     Class    @relation(fields: [classId], references: [classId])
+}
+model Guardian {
+  gurdianId        String   @id @default(uuid())
+  fullName  String
+  contact   String
+  studentId String
+
+  student   Student  @relation(fields: [studentId], references: [studentId])
+}
+model Payment {
+  paymentId          String   @id @default(uuid())
+  studentId   String
+  amount      Float
+  status      PaymentStatus
+  paidAt      DateTime?
+
+  student     Student  @relation(fields: [studentId], references: [studentId])
+}
+
