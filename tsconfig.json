@@ -1,14 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "outDir": "dist",
-    "rootDir": "src",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "module": "commonjs",
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]

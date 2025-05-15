@@ -1,13 +1,24 @@
-import { Hono } from 'hono';
-import { serve } from '@hono/node-server';
-import prisma from './lib/prisma.ts';
-import 'dotenv/config';
+import "dotenv/config";
+import { Hono } from "hono";
+import { serve } from "@hono/node-server";
+import { logger } from "@/middlewares/logger";
+import userRoutes from "@/router/user-router";
 
 const app = new Hono();
 
-app.get('/', async (c) => {
-  const users = await prisma.user.findMany();
-  return c.json(users);
+const PORT = process.env.PORT || 4100;
+
+app.use("*", logger);
+
+app.route("/users", userRoutes);
+
+app.notFound((c) => c.json({ error: "Not Found" }, 404));
+
+app.onError((err, c) => {
+  console.error(err);
+  return c.json({ error: "Something went wrong" }, 500);
 });
 
-serve(app);
+serve(app, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+});
