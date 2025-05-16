@@ -6,7 +6,7 @@ import userRoutes from "@/router/user-router";
 
 const app = new Hono();
 
-const PORT = process.env.PORT || 4100;
+const PORT = Number(process.env.PORT) || 4100;
 
 app.use("*", logger);
 
@@ -19,6 +19,9 @@ app.onError((err, c) => {
   return c.json({ error: "Something went wrong" }, 500);
 });
 
-serve(app, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+serve({
+  fetch: app.fetch,
+  port: PORT,
 });
+
+console.log(`🚀 Server running at http://localhost:${PORT}`);
